@@ -1,4 +1,12 @@
 import os
+import psutil
+
+try:
+    import psutil
+    psutil_installed = True
+except ImportError:
+    psutil_installed = False
+
 import webbrowser
 import colorsys
 
@@ -24,6 +32,12 @@ def Selections():
     if user == "1":
         print("specs")
         print("CPU cores:", os.cpu_count)
+        
+        if psutil_installed:
+            total_mem = psutil.virtual_memory().total / (1024**3)
+            print(f"Memory: {total_mem:.2f} GB")
+        else:
+            print("Memory: psutil library not installed on your computer please run 'pip install psutil'")
 
     elif user == "2":
         webbrowser.open_new_tab("https://www.speedtest.net/")
