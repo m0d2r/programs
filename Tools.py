@@ -20,7 +20,7 @@ def clear_console():
 clear_console()
 
 def Selections():
-    print("Welcome in tools V1.0")
+    print("Welcome in tools V1.0 (discontinued)")
     print("build: 1")
 
     print("1. Specs")
