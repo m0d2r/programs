@@ -1,3 +1,6 @@
+# Discontinued repo
+THIS REPOSITARY IS DISCONTINUED
+
 # Welcome
 welcome to my programs repositary
 
