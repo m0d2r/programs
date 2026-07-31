@@ -1,8 +1,4 @@
-# Discontinued repo
-THIS REPOSITARY IS DISCONTINUED
+# About MacOS launcher
+MacOS launcher is a Launcher that uses Your existing .img file and run it inside qemu this its currently really buggy
 
-# Welcome
-welcome to my programs repositary
-
-# Verify code
-You can verify the code because its open-source Check the code
+(THIS PROJECT IS MADE WITH CLAUDE CODE)
