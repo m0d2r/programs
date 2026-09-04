@@ -1,6 +1,8 @@
 package com.example.aitester.ui.detail
 
+import android.content.res.ColorStateList
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -41,7 +43,12 @@ class IssueDetailActivity : AppCompatActivity() {
         setupWindowInsets()
         setupToolbar()
 
-        val issue = intent.getParcelableExtra<GitHubIssue>("issue")
+        val issue = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra("issue", GitHubIssue::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra("issue")
+        }
         if (issue != null) {
             displayIssue(issue)
             loadComments(issue.number)
@@ -94,7 +101,12 @@ class IssueDetailActivity : AppCompatActivity() {
                 isClickable = false
                 try {
                     val color = Color.parseColor("#${label.color}")
-                    chipBackgroundColor = android.content.res.ColorStateList.valueOf(color)
+                    chipBackgroundColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        ColorStateList.valueOf(color)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        ColorStateList(arrayOf(IntArray(0)), intArrayOf(color))
+                    }
                     setTextColor(getContrastColor(color))
                 } catch (e: Exception) {
                     chipStrokeWidth = 1f
