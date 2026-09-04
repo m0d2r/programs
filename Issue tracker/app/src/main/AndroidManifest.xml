@@ -22,6 +22,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.detail.IssueDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AITESTER"/>
+
     </application>
 
 </manifest>
