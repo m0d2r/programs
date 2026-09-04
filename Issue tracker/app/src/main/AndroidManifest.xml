@@ -3,8 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
+        android:name=".AITesterApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -24,6 +27,16 @@
 
         <activity
             android:name=".ui.detail.IssueDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AITESTER"/>
+
+        <activity
+            android:name=".ui.settings.SettingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AITESTER"/>
+
+        <activity
+            android:name=".ui.debug.DebugActivity"
             android:exported="false"
             android:theme="@style/Theme.AITESTER"/>
 

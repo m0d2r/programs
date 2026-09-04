@@ -3,9 +3,13 @@
     <item
         android:id="@+id/nav_home"
         android:icon="@android:drawable/ic_menu_today"
-        android:title="Hlavní stránka"/>
+        android:title="@string/home_title"/>
     <item
-        android:id="@+id/nav_news"
+        android:id="@+id/nav_open"
         android:icon="@android:drawable/ic_menu_agenda"
-        android:title="Issues"/>
+        android:title="@string/open_issues_filter"/>
+    <item
+        android:id="@+id/nav_closed"
+        android:icon="@android:drawable/ic_menu_close_clear_cancel"
+        android:title="@string/closed_issues_filter"/>
 </menu>

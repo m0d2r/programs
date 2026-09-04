@@ -8,17 +8,18 @@ import org.json.JSONArray
 import java.net.HttpURLConnection
 import java.net.URL
 
-class GitHubService {
+class GitHubService(
+    private val owner: String,
+    private val repo: String
+) {
 
     companion object {
         private const val BASE_URL = "https://api.github.com"
-        private const val OWNER = "StormPatrikCZ"
-        private const val REPO = "LandawasOS"
     }
 
     suspend fun getIssues(state: String = "all"): Result<List<GitHubIssue>> = withContext(Dispatchers.IO) {
         try {
-            val url = URL("$BASE_URL/repos/$OWNER/$REPO/issues?state=$state&sort=updated&per_page=50")
+            val url = URL("$BASE_URL/repos/$owner/$repo/issues?state=$state&sort=updated&per_page=50")
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
@@ -47,7 +48,7 @@ class GitHubService {
 
     suspend fun getIssueComments(issueNumber: Int): Result<List<GitHubComment>> = withContext(Dispatchers.IO) {
         try {
-            val url = URL("$BASE_URL/repos/$OWNER/$REPO/issues/$issueNumber/comments?per_page=100")
+            val url = URL("$BASE_URL/repos/$owner/$repo/issues/$issueNumber/comments?per_page=100")
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             connection.setRequestProperty("Accept", "application/vnd.github.v3+json")

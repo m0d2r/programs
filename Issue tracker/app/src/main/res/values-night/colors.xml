@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Same hue as light theme but darker surfaces for dark mode -->
+    <color name="md3_primary">#1976D2</color>
+    <color name="md3_on_primary">#FFFFFF</color>
+    <color name="md3_primary_container">#004A77</color>
+    <color name="md3_on_primary_container">#D1E4FF</color>
+
+    <color name="md3_secondary">#535F70</color>
+    <color name="md3_on_secondary">#FFFFFF</color>
+    <color name="md3_secondary_container">#3B4458</color>
+    <color name="md3_on_secondary_container">#D7E3F7</color>
+
+    <color name="md3_tertiary">#6B5778</color>
+    <color name="md3_on_tertiary">#FFFFFF</color>
+    <color name="md3_tertiary_container">#533D5C</color>
+    <color name="md3_on_tertiary_container">#F2DAFF</color>
+
+    <color name="md3_error">#BA1A1A</color>
+    <color name="md3_on_error">#FFFFFF</color>
+    <color name="md3_error_container">#8C1D18</color>
+    <color name="md3_on_error_container">#FFDAD6</color>
+
+    <color name="md3_background">#1A1C1E</color>
+    <color name="md3_on_background">#E3E2E6</color>
+
+    <color name="md3_surface">#1A1C1E</color>
+    <color name="md3_on_surface">#E3E2E6</color>
+    <color name="md3_surface_variant">#43474E</color>
+    <color name="md3_on_surface_variant">#C3C6CF</color>
+
+    <color name="md3_outline">#8D9199</color>
+    <color name="md3_outline_variant">#43474E</color>
+
+    <color name="md3_inverse_surface">#E3E2E6</color>
+    <color name="md3_inverse_on_surface">#2F3033</color>
+    <color name="md3_inverse_primary">#1976D2</color>
+</resources>

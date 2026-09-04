@@ -16,6 +16,7 @@ data class GitHubIssue(
     val labels: List<GitHubLabel>,
     val htmlUrl: String
 ) : Parcelable {
+    @Suppress("DEPRECATION")
     constructor(parcel: Parcel) : this(
         id = parcel.readLong(),
         number = parcel.readInt(),

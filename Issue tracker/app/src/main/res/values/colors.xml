@@ -1,47 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Material Design 3 Color System -->
+    <!-- Material Design 3 Blue Color System (for non-Material You devices) -->
 
-    <!-- Primary -->
-    <color name="md3_primary">#6750A4</color>
+    <!-- Primary - Blue -->
+    <color name="md3_primary">#1976D2</color>
     <color name="md3_on_primary">#FFFFFF</color>
-    <color name="md3_primary_container">#EADDFF</color>
-    <color name="md3_on_primary_container">#21005D</color>
+    <color name="md3_primary_container">#D1E4FF</color>
+    <color name="md3_on_primary_container">#001D36</color>
 
-    <!-- Secondary -->
-    <color name="md3_secondary">#625B71</color>
+    <!-- Secondary - Blue variant -->
+    <color name="md3_secondary">#535F70</color>
     <color name="md3_on_secondary">#FFFFFF</color>
-    <color name="md3_secondary_container">#E8DEF8</color>
-    <color name="md3_on_secondary_container">#1D192B</color>
+    <color name="md3_secondary_container">#D7E3F7</color>
+    <color name="md3_on_secondary_container">#101C2B</color>
 
     <!-- Tertiary -->
-    <color name="md3_tertiary">#7D5260</color>
+    <color name="md3_tertiary">#6B5778</color>
     <color name="md3_on_tertiary">#FFFFFF</color>
-    <color name="md3_tertiary_container">#FFD8E4</color>
-    <color name="md3_on_tertiary_container">#31111D</color>
+    <color name="md3_tertiary_container">#F2DAFF</color>
+    <color name="md3_on_tertiary_container">#251431</color>
 
     <!-- Error -->
-    <color name="md3_error">#B3261E</color>
+    <color name="md3_error">#BA1A1A</color>
     <color name="md3_on_error">#FFFFFF</color>
-    <color name="md3_error_container">#F9DEDC</color>
-    <color name="md3_on_error_container">#410E0B</color>
+    <color name="md3_error_container">#FFDAD6</color>
+    <color name="md3_on_error_container">#410002</color>
 
     <!-- Background -->
-    <color name="md3_background">#FFFBFE</color>
-    <color name="md3_on_background">#1C1B1F</color>
+    <color name="md3_background">#FDFCFF</color>
+    <color name="md3_on_background">#1A1C1E</color>
 
     <!-- Surface -->
-    <color name="md3_surface">#FFFBFE</color>
-    <color name="md3_on_surface">#1C1B1F</color>
-    <color name="md3_surface_variant">#E7E0EC</color>
-    <color name="md3_on_surface_variant">#49454F</color>
+    <color name="md3_surface">#FDFCFF</color>
+    <color name="md3_on_surface">#1A1C1E</color>
+    <color name="md3_surface_variant">#DFE2EB</color>
+    <color name="md3_on_surface_variant">#43474E</color>
 
     <!-- Outline -->
-    <color name="md3_outline">#79747E</color>
-    <color name="md3_outline_variant">#CAC4D0</color>
+    <color name="md3_outline">#73777F</color>
+    <color name="md3_outline_variant">#C3C6CF</color>
 
     <!-- Inverse -->
-    <color name="md3_inverse_surface">#313033</color>
-    <color name="md3_inverse_on_surface">#F4EFF4</color>
-    <color name="md3_inverse_primary">#D0BCFF</color>
+    <color name="md3_inverse_surface">#2F3033</color>
+    <color name="md3_inverse_on_surface">#F1F0F4</color>
+    <color name="md3_inverse_primary">#9ECAFF</color>
 </resources>

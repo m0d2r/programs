@@ -47,6 +47,7 @@ class IssuesAdapter(
             // Labels
             labelsGroup.removeAllViews()
             issue.labels.take(3).forEach { label ->
+                @Suppress("DEPRECATION")
                 val chip = Chip(itemView.context).apply {
                     text = label.name
                     isClickable = false
@@ -82,7 +83,7 @@ class IssuesAdapter(
             dateText.text = formatDate(issue.updatedAt)
 
             // Comments
-            commentsText.text = "💬 ${issue.comments}"
+            commentsText.text = itemView.context.getString(R.string.comments_count, issue.comments)
 
             // Click
             card.setOnClickListener { onIssueClick(issue) }

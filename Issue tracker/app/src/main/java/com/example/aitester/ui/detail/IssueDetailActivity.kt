@@ -16,9 +16,9 @@ import androidx.lifecycle.lifecycleScope
 import com.example.aitester.R
 import com.example.aitester.data.model.GitHubIssue
 import com.example.aitester.data.network.GitHubService
+import com.example.aitester.data.preferences.PreferencesManager
 import com.example.aitester.databinding.ActivityIssueDetailBinding
 import com.google.android.material.chip.Chip
-import com.google.android.material.color.DynamicColors
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -26,19 +26,21 @@ import java.util.Locale
 class IssueDetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityIssueDetailBinding
-    private val gitHubService = GitHubService()
+    private lateinit var gitHubService: GitHubService
+    private lateinit var preferencesManager: PreferencesManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        DynamicColors.applyToActivityIfAvailable(this)
 
         binding = ActivityIssueDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // Slide in animation
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        overridePendingTransitionCompat(R.anim.slide_in_right, R.anim.slide_out_left)
+
+        preferencesManager = PreferencesManager(this)
 
         setupWindowInsets()
         setupToolbar()
@@ -51,7 +53,11 @@ class IssueDetailActivity : AppCompatActivity() {
         }
         if (issue != null) {
             displayIssue(issue)
-            loadComments(issue.number)
+            lifecycleScope.launch {
+                val (owner, repo) = preferencesManager.getFullRepo()
+                gitHubService = GitHubService(owner, repo)
+                loadComments(issue.number)
+            }
         } else {
             finish()
         }
@@ -74,17 +80,17 @@ class IssueDetailActivity : AppCompatActivity() {
 
         // State badge
         if (issue.state == "open") {
-            binding.issueState.text = "○ Open"
+            binding.issueState.text = "○ " + getString(R.string.state_open)
             binding.issueState.setBackgroundColor(getColor(R.color.md3_secondary))
         } else {
-            binding.issueState.text = "✓ Closed"
+            binding.issueState.text = "✓ " + getString(R.string.state_closed)
             binding.issueState.setBackgroundColor(getColor(R.color.md3_error))
         }
 
         binding.issueTitle.text = issue.title
         binding.issueAuthor.text = issue.user.login
         binding.issueDate.text = formatDate(issue.createdAt)
-        binding.issueCommentsCount.text = "${issue.comments} komentářů"
+        binding.issueCommentsCount.text = getString(R.string.comments_count, issue.comments)
 
         if (issue.body.isNotBlank()) {
             binding.issueBody.visibility = View.VISIBLE
@@ -128,7 +134,7 @@ class IssueDetailActivity : AppCompatActivity() {
             result.onSuccess { comments ->
                 if (comments.isEmpty()) {
                     binding.commentsError.visibility = View.VISIBLE
-                    binding.commentsError.text = "Žádné komentáře"
+                    binding.commentsError.text = getString(R.string.no_comments)
                     binding.commentsError.setTextColor(getColor(R.color.md3_on_surface_variant))
                 } else {
                     displayComments(comments)
@@ -171,6 +177,11 @@ class IssueDetailActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+        overridePendingTransitionCompat(R.anim.slide_in_left, R.anim.slide_out_right)
+    }
+
+    @Suppress("DEPRECATION")
+    private fun overridePendingTransitionCompat(enterAnim: Int, exitAnim: Int) {
+        overridePendingTransition(enterAnim, exitAnim)
     }
 }

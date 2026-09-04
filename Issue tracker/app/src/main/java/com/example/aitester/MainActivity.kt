@@ -2,6 +2,8 @@ package com.example.aitester
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
@@ -11,25 +13,36 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.aitester.data.model.GitHubIssue
 import com.example.aitester.data.network.GitHubService
+import com.example.aitester.data.preferences.PreferencesManager
 import com.example.aitester.databinding.ActivityMainBinding
 import com.example.aitester.ui.adapter.IssuesAdapter
 import com.example.aitester.ui.detail.IssueDetailActivity
-import com.google.android.material.color.DynamicColors
+import com.example.aitester.ui.settings.SettingsActivity
+import com.example.aitester.worker.IssueCheckWorker
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val gitHubService = GitHubService()
+    private lateinit var gitHubService: GitHubService
+    private lateinit var preferencesManager: PreferencesManager
     private lateinit var issuesAdapter: IssuesAdapter
+
+    private var allIssues: List<GitHubIssue> = emptyList()
+    private var currentFilter: String = "open" // "open", "closed"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        preferencesManager = PreferencesManager(this)
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        DynamicColors.applyToActivityIfAvailable(this)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -39,6 +52,22 @@ class MainActivity : AppCompatActivity() {
         setupBottomNavigation()
         setupRecyclerView()
         setupRetryButton()
+        scheduleIssueCheck()
+
+        // Initialize GitHubService with stored repo
+        lifecycleScope.launch {
+            val (owner, repo) = preferencesManager.getFullRepo()
+            gitHubService = GitHubService(owner, repo)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Reload repo settings in case they changed
+        lifecycleScope.launch {
+            val (owner, repo) = preferencesManager.getFullRepo()
+            gitHubService = GitHubService(owner, repo)
+        }
     }
 
     private fun setupWindowInsets() {
@@ -61,6 +90,37 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_settings -> {
+                startActivity(Intent(this, SettingsActivity::class.java))
+                true
+            }
+            R.id.action_debug -> {
+                startActivity(Intent(this, com.example.aitester.ui.debug.DebugActivity::class.java))
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun scheduleIssueCheck() {
+        val workRequest = PeriodicWorkRequestBuilder<IssueCheckWorker>(
+            15, TimeUnit.MINUTES
+        ).build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            IssueCheckWorker.WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            workRequest
+        )
+    }
+
     private fun setupBottomNavigation() {
         val bottomNav = binding.bottomNavigation
 
@@ -68,47 +128,31 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_home -> {
                     binding.toolbar.title = getString(R.string.app_name)
-                    if (binding.newsContent.visibility == View.VISIBLE) {
-                        // Animate out issues, in home
-                        val fadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out)
-                        val fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in)
-                        binding.newsContent.startAnimation(fadeOut)
-                        fadeOut.setAnimationListener(object : android.view.animation.Animation.AnimationListener {
-                            override fun onAnimationStart(p0: android.view.animation.Animation?) {}
-                            override fun onAnimationRepeat(p0: android.view.animation.Animation?) {}
-                            override fun onAnimationEnd(p0: android.view.animation.Animation?) {
-                                binding.newsContent.visibility = View.GONE
-                                binding.homeContent.visibility = View.VISIBLE
-                                binding.homeContent.startAnimation(fadeIn)
-                            }
-                        })
+                    binding.homeContent.visibility = View.VISIBLE
+                    binding.newsContent.visibility = View.GONE
+                    true
+                }
+                R.id.nav_open -> {
+                    binding.toolbar.title = getString(R.string.open_issues_filter)
+                    binding.homeContent.visibility = View.GONE
+                    binding.newsContent.visibility = View.VISIBLE
+                    currentFilter = "open"
+                    if (allIssues.isEmpty()) {
+                        loadIssues()
+                    } else {
+                        filterAndDisplayIssues()
                     }
                     true
                 }
-                R.id.nav_news -> {
-                    binding.toolbar.title = "Issues"
-                    if (binding.homeContent.visibility == View.VISIBLE) {
-                        // Animate out home, in issues
-                        val fadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out)
-                        val fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in)
-                        binding.homeContent.startAnimation(fadeOut)
-                        fadeOut.setAnimationListener(object : android.view.animation.Animation.AnimationListener {
-                            override fun onAnimationStart(p0: android.view.animation.Animation?) {}
-                            override fun onAnimationRepeat(p0: android.view.animation.Animation?) {}
-                            override fun onAnimationEnd(p0: android.view.animation.Animation?) {
-                                binding.homeContent.visibility = View.GONE
-                                binding.newsContent.visibility = View.VISIBLE
-                                binding.newsContent.startAnimation(fadeIn)
-                            }
-                        })
-                    } else if (binding.newsContent.visibility == View.GONE) {
-                        binding.homeContent.visibility = View.GONE
-                        binding.newsContent.visibility = View.VISIBLE
-                        binding.newsContent.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in))
-                    }
-
-                    if (issuesAdapter.itemCount == 0) {
+                R.id.nav_closed -> {
+                    binding.toolbar.title = getString(R.string.closed_title)
+                    binding.homeContent.visibility = View.GONE
+                    binding.newsContent.visibility = View.VISIBLE
+                    currentFilter = "closed"
+                    if (allIssues.isEmpty()) {
                         loadIssues()
+                    } else {
+                        filterAndDisplayIssues()
                     }
                     true
                 }
@@ -117,18 +161,39 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun filterAndDisplayIssues() {
+        val filtered = when (currentFilter) {
+            "open" -> allIssues.filter { it.state == "open" }
+            "closed" -> allIssues.filter { it.state == "closed" }
+            else -> allIssues
+        }
+
+        if (filtered.isEmpty()) {
+            binding.errorLayout.visibility = View.VISIBLE
+            binding.errorMessage.text = getString(R.string.no_issues)
+            binding.issuesRecycler.visibility = View.GONE
+        } else {
+            binding.errorLayout.visibility = View.GONE
+            binding.issuesRecycler.visibility = View.VISIBLE
+            issuesAdapter.submitList(filtered)
+            binding.issuesRecycler.postDelayed({
+                binding.issuesRecycler.scheduleLayoutAnimation()
+            }, 100)
+        }
+    }
+
     private fun setupRecyclerView() {
         issuesAdapter = IssuesAdapter { issue ->
-            // Animate card press
             val intent = Intent(this, IssueDetailActivity::class.java)
             intent.putExtra("issue", issue)
             startActivity(intent)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            overridePendingTransitionCompat(R.anim.slide_in_right, R.anim.slide_out_left)
         }
 
         binding.issuesRecycler.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = issuesAdapter
+            isNestedScrollingEnabled = true
         }
     }
 
@@ -149,31 +214,27 @@ class MainActivity : AppCompatActivity() {
             binding.loadingIndicator.visibility = View.GONE
 
             result.onSuccess { issues ->
-                if (issues.isEmpty()) {
-                    binding.errorLayout.visibility = View.VISIBLE
-                    binding.errorMessage.text = "Žádné issues v repozitáři"
-                } else {
-                    binding.issuesRecycler.visibility = View.VISIBLE
+                allIssues = issues
 
-                    val openCount = issues.count { it.state == "open" }
-                    val closedCount = issues.count { it.state == "closed" }
-                    binding.issuesCountText.text = "○ $openCount otevřených • ✓ $closedCount uzavřených"
+                val openCount = issues.count { it.state == "open" }
+                val closedCount = issues.count { it.state == "closed" }
+                binding.issuesCountText.text = getString(R.string.open_issues, openCount) + " • " + getString(R.string.closed_issues, closedCount)
 
-                    issuesAdapter.submitList(issues)
-                    // Animate items sliding in
-                    binding.issuesRecycler.postDelayed({
-                        binding.issuesRecycler.scheduleLayoutAnimation()
-                    }, 100)
-                }
+                filterAndDisplayIssues()
             }.onFailure { error ->
                 binding.errorLayout.visibility = View.VISIBLE
-                binding.errorMessage.text = error.message ?: "Neznámá chyba"
+                binding.errorMessage.text = error.message ?: getString(R.string.unknown_error)
             }
         }
     }
 
     override fun finish() {
         super.finish()
-        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+        overridePendingTransitionCompat(R.anim.slide_in_left, R.anim.slide_out_right)
+    }
+
+    @Suppress("DEPRECATION")
+    private fun overridePendingTransitionCompat(enterAnim: Int, exitAnim: Int) {
+        overridePendingTransition(enterAnim, exitAnim)
     }
 }
