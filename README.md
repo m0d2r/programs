@@ -1,2 +1,3 @@
-# ISSUE TRACKED FOR LANDAWASOS
-This tracker is just for LandaWasOS
+# Programs for better life
+1. Issue tracker
+2. Monitor swither for spacedesk
